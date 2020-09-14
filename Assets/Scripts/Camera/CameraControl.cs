@@ -2,23 +2,21 @@
 
 public class CameraControl : MonoBehaviour
 {
-    public float m_DampTime = 0.2f;                 
-    public float m_ScreenEdgeBuffer = 4f;           
-    public float m_MinSize = 6.5f;                  
-    [HideInInspector] public Transform[] m_Targets; 
-
+    public float m_DampTime = 0.2f;         // time for the camera to react and get to its proper position
+    public float m_ScreenEdgeBuffer = 4f;   // padding for the tanks from the edge of the screen
+    public float m_MinSize = 6.5f;          // camera's minimum size
+    //[HideInInspector] public Transform[] m_Targets; // array of tanks
+    public Transform[] m_Targets; // array of tanks
 
     private Camera m_Camera;                        
     private float m_ZoomSpeed;                      
     private Vector3 m_MoveVelocity;                 
-    private Vector3 m_DesiredPosition;              
-
+    private Vector3 m_DesiredPosition;      // average position between the tanks
 
     private void Awake()
     {
         m_Camera = GetComponentInChildren<Camera>();
     }
-
 
     private void FixedUpdate()
     {
@@ -26,14 +24,11 @@ public class CameraControl : MonoBehaviour
         Zoom();
     }
 
-
     private void Move()
     {
         FindAveragePosition();
-
         transform.position = Vector3.SmoothDamp(transform.position, m_DesiredPosition, ref m_MoveVelocity, m_DampTime);
     }
-
 
     private void FindAveragePosition()
     {
@@ -53,10 +48,8 @@ public class CameraControl : MonoBehaviour
             averagePos /= numTargets;
 
         averagePos.y = transform.position.y;
-
         m_DesiredPosition = averagePos;
     }
-
 
     private void Zoom()
     {
@@ -64,11 +57,10 @@ public class CameraControl : MonoBehaviour
         m_Camera.orthographicSize = Mathf.SmoothDamp(m_Camera.orthographicSize, requiredSize, ref m_ZoomSpeed, m_DampTime);
     }
 
-
     private float FindRequiredSize()
     {
+        // calculate the desired position for the camera rig in its local space
         Vector3 desiredLocalPos = transform.InverseTransformPoint(m_DesiredPosition);
-
         float size = 0f;
 
         for (int i = 0; i < m_Targets.Length; i++)
@@ -76,29 +68,24 @@ public class CameraControl : MonoBehaviour
             if (!m_Targets[i].gameObject.activeSelf)
                 continue;
 
+            // find the position of tanks in the camera rig local space
             Vector3 targetLocalPos = transform.InverseTransformPoint(m_Targets[i].position);
-
             Vector3 desiredPosToTarget = targetLocalPos - desiredLocalPos;
 
-            size = Mathf.Max (size, Mathf.Abs (desiredPosToTarget.y));
-
-            size = Mathf.Max (size, Mathf.Abs (desiredPosToTarget.x) / m_Camera.aspect);
+            size = Mathf.Max(size, Mathf.Abs(desiredPosToTarget.y));
+            size = Mathf.Max(size, Mathf.Abs(desiredPosToTarget.x) / m_Camera.aspect);
         }
         
         size += m_ScreenEdgeBuffer;
-
         size = Mathf.Max(size, m_MinSize);
 
         return size;
     }
 
-
     public void SetStartPositionAndSize()
     {
         FindAveragePosition();
-
         transform.position = m_DesiredPosition;
-
         m_Camera.orthographicSize = FindRequiredSize();
     }
 }
