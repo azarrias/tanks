@@ -6,16 +6,14 @@ public class TankManager
 {
     public Color m_PlayerColor;            
     public Transform m_SpawnPoint;         
-    [HideInInspector] public int m_PlayerNumber;             
-    [HideInInspector] public string m_ColoredPlayerText;
-    [HideInInspector] public GameObject m_Instance;          
-    [HideInInspector] public int m_Wins;                     
+    [HideInInspector] public int m_PlayerNumber;            // used to determine input axis
+    [HideInInspector] public string m_ColoredPlayerText;    // use color for HTML-like rich text
+    [HideInInspector] public GameObject m_Instance;         // reference to the tank
+    [HideInInspector] public int m_Wins;                    // number of wins by this tank
 
-
-    private TankMovement m_Movement;       
+    private TankMovement m_Movement;        // references to scripts
     private TankShooting m_Shooting;
-    private GameObject m_CanvasGameObject;
-
+    private GameObject m_CanvasGameObject;  // turn UI on or off
 
     public void Setup()
     {
@@ -28,14 +26,13 @@ public class TankManager
 
         m_ColoredPlayerText = "<color=#" + ColorUtility.ToHtmlStringRGB(m_PlayerColor) + ">PLAYER " + m_PlayerNumber + "</color>";
 
+        // set the tanks material color to the color of the player for each of its meshrenderers
         MeshRenderer[] renderers = m_Instance.GetComponentsInChildren<MeshRenderer>();
-
         for (int i = 0; i < renderers.Length; i++)
         {
             renderers[i].material.color = m_PlayerColor;
         }
     }
-
 
     public void DisableControl()
     {
@@ -45,7 +42,6 @@ public class TankManager
         m_CanvasGameObject.SetActive(false);
     }
 
-
     public void EnableControl()
     {
         m_Movement.enabled = true;
@@ -53,7 +49,6 @@ public class TankManager
 
         m_CanvasGameObject.SetActive(true);
     }
-
 
     public void Reset()
     {
